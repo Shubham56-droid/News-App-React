@@ -1,0 +1,50 @@
+#searchInp {
+  outline: none;
+  border: none;
+  width: 85%;
+  height: 100%;
+  padding-left: 20px;
+}
+.inputbox ion-icon {
+  font-size: 40px;
+}
+.inputbox {
+  width: 25%;
+  border-radius: 30px;
+}
+.navContent li {
+  transition: 0.5s ease;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.navContent li:hover {
+  background: #fff;
+  color: #222;
+  padding-left: 30px;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.newsItem {
+  box-shadow: 0 0 1em #b6b6b6;
+}
+.newBox {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 45%;
+  width: 100%;
+  background-color: #0e0e0eb2;
+  transition: 0.5s ease;
+}
+.newOuterBox:hover .newBox {
+  height: 100%;
+}
+
+.newsItem {
+}
