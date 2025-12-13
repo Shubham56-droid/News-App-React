@@ -1,87 +1,90 @@
 import "./App.css";
+import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import Carousel from "./components/Carousel";
-import { useEffect, useState } from "react";
 import NewsCard from "./components/NewsCard";
 
 function App() {
+  const apiKey = import.meta.env.VITE_API_KEY;
   const [navOpen, setNavOpen] = useState(false);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const apiKey = import.meta.env.VITE_API_KEY;
 
-  const [country, setCountry] = useState("us");
-  const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
-  const [type, setType] = useState("top-headlines");
+  const [query, setQuery] = useState("");
+  const [searchInp, setSearchInp] = useState("");
+
   const [cardData, setCardData] = useState(null);
 
-  const [searchInp,setSearchInp] = useState("")
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQuery(searchInp.trim());
+      setCategory("");
+      setPage(1);
+    }, 800);
 
+    return () => clearTimeout(timer);
+  }, [searchInp]);
 
-  let url = `https://newsapi.org/v2/${type}?country=${country}&apiKey=${apiKey}`;
+  let url = "";
 
-  if (category) {
-    url += `&category=${category}`;
-  }
-  if (page) {
-    url += `&page=${page}`;
-  }
-  if (query){ 
-    url += `&q=${query}`;
+  if (query) {
+    url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(
+      query
+    )}&page=${page}&apiKey=${apiKey}`;
+  } else {
+    url = `https://newsapi.org/v2/top-headlines?country=us&page=${page}&apiKey=${apiKey}`;
+
+    if (category) {
+      url += `&category=${category}`;
+    }
   }
 
   useEffect(() => {
+    if (!url) return;
+
+    const controller = new AbortController();
+
     const fetchNews = async () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error("Failed to Fetch Data");
-        }
+
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error("Failed to fetch news");
+
         const data = await res.json();
-        setNews(data.articles);
+        setNews(data.articles || []);
       } catch (err) {
-        setError(err.message);
+        if (err.name !== "AbortError") {
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    if (url) {
-      fetchNews();
-    }
+    fetchNews();
+
+    return () => controller.abort();
   }, [url]);
 
-
- // debouncing
-  useEffect(()=>{
-      const delay = setTimeout(() => {
-        setQuery(searchInp);
-        if(searchInp.trim()===""){
-          setType("everything");
-        }else{
-          setType("top-headlines");
-        }
-      }, 1000);
-      return ()=> clearTimeout(delay)
-  },[searchInp])
-
-
-
-  if (loading)
+  if (loading) {
     return (
       <h2
-        className="font-monospace text-center mt-3 d-flex justify-content-center align-items-center"
-        style={{ height: "100vh", width: "100%", fontSize: "4em" }}
+        className="font-monospace d-flex justify-content-center align-items-center"
+        style={{ height: "100vh", fontSize: "4em" }}
       >
         Loading...
       </h2>
     );
-  if(error) return <h2 className="font-monospace text-center mt-3">Error Occured</h2>
+  }
+
+  if (error) {
+    return <h2 className="font-monospace text-center mt-3">Error Occurred</h2>;
+  }
 
   return (
     <div className="mb-3">
@@ -95,17 +98,18 @@ function App() {
           setSearchInp={setSearchInp}
         />
       )}
+
       {!cardData && (
         <Carousel
           newsArr={news}
           page={page}
           setPage={setPage}
           category={category}
-          setCardData={setCardData}
           query={query}
+          setCardData={setCardData}
         />
       )}
-      {console.log(news)}
+
       {cardData && <NewsCard cardData={cardData} setCardData={setCardData} />}
     </div>
   );

@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function Carousel({ newsArr, page, setPage, category, setCardData, query}) {
+function Carousel({ newsArr, page, setPage, category, setCardData, query }) {
   const [data, setData] = useState(newsArr);
   const [isLoadMore, setIsLoadMore] = useState(false);
+
+  useEffect(() => {
+    setData(newsArr);
+  }, [newsArr]);
 
   function addMore() {
     if (20 - data.length <= 1) {
